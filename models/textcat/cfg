@@ -1,0 +1,18 @@
+{
+  "exclusive_classes":true,
+  "architecture":"simple_cnn",
+  "labels":[
+    "Society & Culture",
+    "Science & Mathematics",
+    "Health",
+    "Education & Reference",
+    "Computers & Internet",
+    "Sports",
+    "Business & Finance",
+    "Entertainment & Music",
+    "Family & Relationships",
+    "Politics & Government"
+  ],
+  "pretrained_vectors":null,
+  "pretrained_dims":null
+}
