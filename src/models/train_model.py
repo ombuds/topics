@@ -92,21 +92,11 @@ def train(train_data=None, valid_data=None, classes=None, model="en_core_web_sm"
                 )
             )
 
-    # test the trained model
-    test_text = "This movie sucked"
-    doc = nlp(test_text)
-    print(test_text, doc.cats)
 
     if output_dir is not None:                            # output_dir must be 
         with nlp.use_params(optimizer.averages):
             nlp.to_disk(output_dir)
         print("Saved model to", output_dir)
-
-        # test the saved model
-        print("Loading from", output_dir)
-        nlp2 = spacy.load(output_dir)
-        doc2 = nlp2(test_text)
-        print(test_text, doc2.cats)
 
 
 def evaluate(tokenizer, textcat, texts, cats):
