@@ -51,20 +51,20 @@ def main(model=None, output_dir=None, n_iter=20, n_texts=2000, init_tok2vec=None
         textcat = nlp.get_pipe("textcat")
 
     # add label to text classifier
-    textcat.add_label("POSITIVE")
+    textcat.add_label("POSITIVE")  # TODO: Replace with loop over classes.txt
     textcat.add_label("NEGATIVE")
 
     # load the IMDB dataset
     print("Loading IMDB data...")
     (train_texts, train_cats), (dev_texts, dev_cats) = load_data()
-    train_texts = train_texts[:n_texts]
+    train_texts = train_texts[:n_texts]                              # TODO: Investigate this second split 
     train_cats = train_cats[:n_texts]
     print(
         "Using {} examples ({} training, {} evaluation)".format(
             n_texts, len(train_texts), len(dev_texts)
         )
     )
-    train_data = list(zip(train_texts, [{"cats": cats} for cats in train_cats]))
+    train_data = list(zip(train_texts, [{"cats": cats} for cats in train_cats]))   # This contains a dict of the categories inside a dict of one entry with key "cats"
 
     # get names of other pipes to disable them during training
     pipe_exceptions = ["textcat", "trf_wordpiecer", "trf_tok2vec"]
@@ -80,9 +80,9 @@ def main(model=None, output_dir=None, n_iter=20, n_texts=2000, init_tok2vec=None
         for i in range(n_iter):
             losses = {}
             # batch up the examples using spaCy's minibatch
-            random.shuffle(train_data)
+            random.shuffle(train_data)                                             # TODO: control this random loop as well
             batches = minibatch(train_data, size=batch_sizes)
-            for batch in batches:
+            for batch in batches:                                                  # TODO: add timer
                 texts, annotations = zip(*batch)
                 nlp.update(texts, annotations, sgd=optimizer, drop=0.2, losses=losses)
             with textcat.model.use_params(optimizer.averages):
@@ -102,7 +102,7 @@ def main(model=None, output_dir=None, n_iter=20, n_texts=2000, init_tok2vec=None
     doc = nlp(test_text)
     print(test_text, doc.cats)
 
-    if output_dir is not None:
+    if output_dir is not None:                            # output_dir must be 
         with nlp.use_params(optimizer.averages):
             nlp.to_disk(output_dir)
         print("Saved model to", output_dir)
@@ -117,12 +117,12 @@ def main(model=None, output_dir=None, n_iter=20, n_texts=2000, init_tok2vec=None
 def load_data(limit=0, split=0.8):
     """Load data from the IMDB dataset."""
     # Partition off part of the train data for evaluation
-    train_data, _ = thinc.extra.datasets.imdb()
-    random.shuffle(train_data)
+    train_data, _ = thinc.extra.datasets.imdb()           # TODO: Replace with text extraction: list of tuples (text,class) <-- not needed
+    random.shuffle(train_data)                            # TODO: Add seed control
     train_data = train_data[-limit:]
-    texts, labels = zip(*train_data)
-    cats = [{"POSITIVE": bool(y), "NEGATIVE": not bool(y)} for y in labels]
-    split = int(len(train_data) * split)
+    texts, labels = zip(*train_data)                      # TODO: assemble list of text, list of categories as integer, 0-based
+    cats = [{"POSITIVE": bool(y), "NEGATIVE": not bool(y)} for y in labels]      # TODO: Replace with classes: list of dict with true/false value for each class
+    split = int(len(train_data) * split)                                         # TODO: Do not subdivide, use train/test from dataset
     return (texts[:split], cats[:split]), (texts[split:], cats[split:])
 
 
@@ -134,12 +134,12 @@ def evaluate(tokenizer, textcat, texts, cats):
     tn = 0.0  # True negatives
     for i, doc in enumerate(textcat.pipe(docs)):
         gold = cats[i]
-        for label, score in doc.cats.items():
+        for label, score in doc.cats.items():                 # This loops over scores of all categories
             if label not in gold:
                 continue
-            if label == "NEGATIVE":
+            if label == "NEGATIVE":                           # TODO: This simplification is for binomial dist, use confusion matrix
                 continue
-            if score >= 0.5 and gold[label] >= 0.5:
+            if score >= 0.5 and gold[label] >= 0.5:           # TODO: Edit the scoring mechanisms to change to multiclass
                 tp += 1.0
             elif score >= 0.5 and gold[label] < 0.5:
                 fp += 1.0
