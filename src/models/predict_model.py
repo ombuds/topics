@@ -24,12 +24,9 @@ def predict(test_text=TEST_TEXT,nlp=None,model_dir=MODEL_DIR):
     logging.info("Evaluating string.")
     return test_text, doc.cats
 
-
-
-if __name__ == "__main__":
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
-    
+def main():
+    '''Loading the data, the model, making predictions, and showing scores.
+    '''
     logging.info("Loading data.")
     train_data, valid_data, classes = load_processed("data/processed/")
 
@@ -49,8 +46,13 @@ if __name__ == "__main__":
     train_scores = evaluate(nlp.tokenizer, nlp.get_pipe("textcat"), train_texts, train_cats)
     dev_scores   = evaluate(nlp.tokenizer, nlp.get_pipe("textcat"), dev_texts  , dev_cats  )
 
-    # Print loss
+    # Print scores
     # TODO: fix printout in log in case of missing loss
-    metrics_log({"textcat":"-9.999"}, scores, prefix="training  :")
-    metrics_log({"textcat":"-9.999"}, scores, prefix="validation:")
+    metrics_log({"textcat":-9.999}, train_scores, prefix="training  :")
+    metrics_log({"textcat":-9.999}, dev_scores, prefix="validation:")
 
+
+if __name__ == "__main__":
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    main()

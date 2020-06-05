@@ -108,6 +108,7 @@ def metrics_log(losses,scores,prefix=""):
     )
 
 def evaluate(tokenizer, textcat, texts, cats):
+    '''Evaluate model performance from multiclass precision/recall built from confusion matrix.'''
     docs = (tokenizer(text) for text in texts)
     # initialize the confusion matrix
     nclasses = len(cats[0])
