@@ -1,0 +1,19 @@
+name: spacy
+channels:
+dependencies:
+# nlp
+   - conda-forge::spacy
+   - conda-forge::spacy-lookups-data
+# cookiecutter
+   - click
+# serving
+   - flask
+# development
+   - nb_conda_kernels
+   - pandas
+   - pip
+   - pylint
+   - intel::mkl-service
+   - ipympl
+   - pip: 
+     - pytest
