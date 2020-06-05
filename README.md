@@ -86,6 +86,15 @@ The service runs locally on port 5000. You may now perform queries on the http e
 http://127.0.0.1:5000/?q=This is a sample query
 ```
 
+## Model architecture
+
+The first objective of this proof-of-concept solution is to present coding style and provide a conversation starting point for realizing similar projects. Therefore the focus was rather on efficiency and ease of integration. Therefore the project and model architecture are based on the python module `spacy` and the text classification tutorial available [here](https://spacy.io/usage/examples). The model use a simple CNN architecture over word vector sequences computed from the `en_core_web_sm` english model.
+
+## Performance metrics
+
+Out of any broader context for the application, it is safe to base performance on well-established metrics such as precision, recall and f-score to get insight on the global performance. However these metric usually refer to binomial classification.
+
+Precision and recall can be computed for each class from the confusion matrix. True positive for each class are available on the diagonal, while the total number of sample in the gold standard are the sum of each line (for recall calculation), and the total number of samples predicted for each class are the sum of each column (for precision calculation). The overall precision and recall is calculated as the average precision and recall of all classes. This gives a higher weight to minority classes in the performance metric compared to using a global prediction accuracy.
 
 Project Organization
 ------------
@@ -105,7 +114,7 @@ Project Organization
     │
     ├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
     │                         the creator's initials, and a short `-` delimited description, e.g.
-    │                         `1.0-jqp-initial-data-exploration`.
+    │                         `0.1-treid-data_extract.ipynb`.
     │
     ├── references         <- Data dictionaries, manuals, and all other explanatory materials.
     │
