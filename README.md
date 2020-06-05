@@ -68,6 +68,12 @@ Evaluate the model.
 python -m src.models.train_model
 ```
 
+The test are run from the root directory using pytest.
+```
+pytest
+```
+
+
 ### Serve the model.
 
 Start the service.
