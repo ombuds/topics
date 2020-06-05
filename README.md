@@ -3,6 +3,84 @@ topics
 
 Document classification model and service built using the Yahoo! Question-Answer dataset.
 
+## Getting Started
+
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
+
+### Prerequisites
+
+This project requires an Anaconda installation.
+
+
+### Installing
+
+Get the project from git.
+```
+git clone https://github.com/ombuds/topics.git
+```
+
+Browse to the project's root directory from the Anaconda terminal, and create a new environment.
+```
+conda env create -f environment.yml
+```
+
+
+Activate the environment.
+
+```
+conda activate topics
+```
+
+Install the project for development:
+
+```
+pip install -e .
+```
+
+Download the language model:
+
+```
+python -m spacy download en_core_web_sm
+```
+
+Download the Yahoo! Question-Answer dataset from here:
+```
+https://drive.google.com/open?id=1BHICkntwHlD_KaaG2_0n6obV9fi_TqBv
+```
+
+Move the dataset tar file to the raw data directory. From the project's root directory, use the following path:
+```
+data/raw/yahoo_answers_csv.tar.gz
+```
+
+Run the dataset preprocessing step.
+```
+python -m src.data.make_dataset
+```
+
+Train the model.
+```
+python -m src.models.train_model
+```
+
+Evaluate the model.
+```
+python -m src.models.train_model
+```
+
+### Serve the model.
+
+Start the service.
+```
+python -m src.serving.app
+```
+
+The service runs locally on port 5000. You may now perform queries on the http entry point such as:
+```
+http://127.0.0.1:5000/?q=This is a sample query
+```
+
+
 Project Organization
 ------------
 
@@ -55,3 +133,4 @@ Project Organization
 --------
 
 <p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
+

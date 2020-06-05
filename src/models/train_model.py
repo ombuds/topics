@@ -7,7 +7,7 @@ import pandas as pd
 import random
 import spacy
 from spacy.util import minibatch, compounding
-from src.data.make_dataset import load_data
+from src.data.make_dataset import load_data, load_processed
 
 MODEL_DIR="models/"
 # TODO: add flow control for minibatch random seed
@@ -19,6 +19,7 @@ def train(train_data=None, valid_data=None, classes=None, model="en_core_web_sm"
     # TODO: Improve flow control for missing input data
     if train_data is None or valid_data is None or classes is None:
         logging.info(f"No data provided: reloading saved processed data.")
+        train_data, valid_data, classes = load_processed()
         
     # Split the dataset tuples
     (train_texts, train_cats) = train_data
@@ -33,10 +34,10 @@ def train(train_data=None, valid_data=None, classes=None, model="en_core_web_sm"
     # load the model from files
     if model is not None:
         nlp = spacy.load(model)  # load existing spaCy model
-        print("Loaded model '%s'" % model)
+        logging.info(f"Loaded model {model}")
     else:
         nlp = spacy.blank("en")  # create blank Language class
-        print("Created blank 'en' model")
+        logging.info("Created blank 'en' model")
 
     # add the text classifier to the pipeline if it doesn't exist
     # nlp.create_pipe works for built-ins that are registered with spaCy
@@ -131,3 +132,7 @@ def evaluate(tokenizer, textcat, texts, cats):
     else:
         f_score = 2 * (precision * recall) / (precision + recall)
     return {"textcat_p": precision, "textcat_r": recall, "textcat_f": f_score}
+
+
+if __name__ == "__main__":
+    train()

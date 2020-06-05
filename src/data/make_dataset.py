@@ -92,10 +92,10 @@ def load_data(input_dir=DATA_RAW_DIR,limit=25000, split=0.8):
     return (texts[:split], cats[:split]), (texts[split:], cats[split:]), classes
 
 # TODO: Add flow control for input/output filepath
-@click.command()
-@click.argument('input_filepath', type=click.Path(exists=True))
-@click.argument('output_filepath', type=click.Path())
-def main(input_filepath, output_filepath):
+# @click.command()
+# @click.argument('input_filepath', type=click.Path(exists=True))
+# @click.argument('output_filepath', type=click.Path())
+def main(input_filepath=None, output_filepath=None):
     """ Runs data processing scripts to turn raw data from (../raw) into
         cleaned data ready to be analyzed (saved in ../processed).
     """

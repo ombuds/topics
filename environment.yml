@@ -1,4 +1,4 @@
-name: spacy
+name: topics
 channels:
 dependencies:
 # nlp

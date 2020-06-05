@@ -30,3 +30,6 @@ def service():
         cats_str="Server error!"
     output = f'<!DOCTYPE html><body>{test_text}<P>{cats_str}:</body></html>'
     return output
+
+if __name__ == '__main__':
+  app.run(host='127.0.0.1', port=5000, debug=True)
