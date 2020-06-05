@@ -1,4 +1,4 @@
-from src.models.train_model import evaluate
+from src.models.train_model import evaluate, metrics_log
 from src.data.make_dataset import load_processed
 import gc
 import logging
@@ -8,7 +8,7 @@ MODEL_DIR="models/"
 TEST_TEXT = "This movie was great!"
 
 def load(model_dir=MODEL_DIR):
-    logging.info("Loading model from", model_dir)
+    logging.info("Loading model from: "+model_dir)
     nlp = spacy.load(model_dir)
     return nlp
 
@@ -32,6 +32,8 @@ if __name__ == "__main__":
     
     logging.info("Loading data.")
     train_data, valid_data, classes = load_processed("data/processed/")
+
+    train_texts, train_cats = train_data
     dev_texts, dev_cats = valid_data
 
     # Cleanup unnecessary data
@@ -43,7 +45,12 @@ if __name__ == "__main__":
     # Load model
     nlp=load(model_dir="models/")
 
-    n=100
-    scores = evaluate(nlp.tokenizer, nlp.get_pipe("textcat"), dev_texts[:n], dev_cats[:n])
+    # Evaluate performance
+    train_scores = evaluate(nlp.tokenizer, nlp.get_pipe("textcat"), train_texts, train_cats)
+    dev_scores   = evaluate(nlp.tokenizer, nlp.get_pipe("textcat"), dev_texts  , dev_cats  )
 
-    pass
+    # Print loss
+    # TODO: fix printout in log in case of missing loss
+    metrics_log({"textcat":"-9.999"}, scores, prefix="training  :")
+    metrics_log({"textcat":"-9.999"}, scores, prefix="validation:")
+

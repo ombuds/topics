@@ -2,8 +2,10 @@ from __future__ import unicode_literals, print_function
 # import plac
 from pathlib import Path
 import logging
-import spacy
+import numpy as np
+import pandas as pd
 import random
+import spacy
 from spacy.util import minibatch, compounding
 from src.data.make_dataset import load_data
 
@@ -28,6 +30,7 @@ def train(train_data=None, valid_data=None, classes=None, model="en_core_web_sm"
         if not output_dir.exists():
             output_dir.mkdir()
 
+    # load the model from files
     if model is not None:
         nlp = spacy.load(model)  # load existing spaCy model
         print("Loaded model '%s'" % model)
@@ -83,45 +86,45 @@ def train(train_data=None, valid_data=None, classes=None, model="en_core_web_sm"
             with textcat.model.use_params(optimizer.averages):
                 # evaluate on the dev data split off in load_data()
                 scores = evaluate(nlp.tokenizer, textcat, dev_texts, dev_cats)
-            print(
-                "{0:.3f}\t{1:.3f}\t{2:.3f}\t{3:.3f}".format(  # print a simple table
-                    losses["textcat"],
-                    scores["textcat_p"],
-                    scores["textcat_r"],
-                    scores["textcat_f"],
-                )
-            )
+            # Show metrics
+            metrics_log(losses,scores)
 
-
-    if output_dir is not None:                            # output_dir must be 
+    # Save model to disk    
+    if output_dir is not None:
         with nlp.use_params(optimizer.averages):
             nlp.to_disk(output_dir)
         print("Saved model to", output_dir)
 
+def metrics_log(losses,scores,prefix=""):
+    '''Show performance metrics in log.'''
+    # TODO: add error protection for prefix type
+    logging.info(prefix+
+        "{0:.3f}\t{1:.3f}\t{2:.3f}\t{3:.3f}".format(  # print a simple table
+            losses["textcat"],
+            scores["textcat_p"],
+            scores["textcat_r"],
+            scores["textcat_f"],
+        )
+    )
 
 def evaluate(tokenizer, textcat, texts, cats):
     docs = (tokenizer(text) for text in texts)
-    tp = 0.0  # True positives
-    fp = 1e-8  # False positives
-    fn = 1e-8  # False negatives
-    tn = 0.0  # True negatives
+    # initialize the confusion matrix
+    nclasses = len(cats[0])
+    confusion_matrix = np.zeros([nclasses,nclasses])
+    # populate the confusion matrix
     for i, doc in enumerate(textcat.pipe(docs)):
-        gold = cats[i]
-        for label, score in doc.cats.items():                 # This loops over scores of all categories
-            if label not in gold:
-                continue
-            if label == "NEGATIVE":                           # TODO: This simplification is for binomial dist, use confusion matrix
-                continue
-            if score >= 0.5 and gold[label] >= 0.5:           # TODO: Edit the scoring mechanisms to change to multiclass
-                tp += 1.0
-            elif score >= 0.5 and gold[label] < 0.5:
-                fp += 1.0
-            elif score < 0.5 and gold[label] < 0.5:
-                tn += 1
-            elif score < 0.5 and gold[label] >= 0.5:
-                fn += 1
-    precision = tp / (tp + fp)
-    recall = tp / (tp + fn)
+        # use the class with maximum score
+        idx_gold = pd.Series(cats[i],name="gold").argmax()
+        idx_pred = pd.Series(doc.cats,name="pred").argmax()
+        confusion_matrix[idx_gold,idx_pred]+=1
+    # Compute class-wise precision and recall
+    # TODO: Implement error detection to avoid division by zero in case not all classes are represented.
+    precisions = confusion_matrix.diagonal() / confusion_matrix.sum(axis=0)
+    recalls = confusion_matrix.diagonal() / confusion_matrix.sum(axis=1)
+    # Average the precision and recall computed over the classes
+    # (this gives more weight to minority classes compared to using accuracy)
+    precision, recall = precisions.mean(), recalls.mean()
     if (precision + recall) == 0:
         f_score = 0.0
     else:
